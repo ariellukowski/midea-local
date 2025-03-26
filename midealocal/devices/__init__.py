@@ -26,6 +26,8 @@ def device_selector(
             device_path = f".{f'x{device_type:02x}'}"
         else:
             device_path = f".{f'{device_type:02x}'}"
+            if model == '560000AG':
+                device_path += '_560000AG'
         module = import_module(device_path, __package__)
         device = module.MideaAppliance(
             name=name,

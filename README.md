@@ -5,7 +5,7 @@
 
 Control your Midea M-Smart appliances via local area network.
 
-This library is part of https://github.com/georgezhao2010/midea_ac_lan code. It was separated to segregate responsibilities.
+This library is part of https://github.com/ariellukowski/midea_ac_lan code. It was separated to segregate responsibilities.
 
 ⭐If this component is helpful for you, please star it, it encourages me a lot.
 
