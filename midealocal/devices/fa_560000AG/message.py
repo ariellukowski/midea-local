@@ -186,7 +186,6 @@ class FA56AGGeneralMessageBody(MessageBody):
         else:
             self.fan_speed = 0
         self.oscillate = (body[8] & 0x01) > 0
-        print(f'body: {body.hex(':')}')
 
 
 class MessageFA56AGResponse(MessageResponse):
