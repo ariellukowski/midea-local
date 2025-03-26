@@ -25,12 +25,12 @@ class DeviceAttributes(StrEnum):
 class MideaFA56AGDevice(MideaDevice):
     """Midea FA device."""
 
-    _modes: ClassVar[list[str]] = [
-        "Normal", # 0
-        "Sleep", # 2
-        "Smart", # 12
-        "ION" # 13
-    ]
+    _modes = {
+        "Normal": 0,
+        "Sleep": 2,
+        "Smart": 12,
+        "ION": 13
+    }
 
     def __init__(
         self,
@@ -72,11 +72,11 @@ class MideaFA56AGDevice(MideaDevice):
     def speed_count(self) -> int:
         """Return the speed count of the device."""
         return self._speed_count
-    
+
     @property
     def preset_modes(self) -> list[str]:
         """Return a list of preset modes."""
-        return self._modes
+        return list(self._modes.keys())
 
     def build_query(self) -> list[MessageQuery]:
         """Midea FA device build query."""
@@ -91,16 +91,7 @@ class MideaFA56AGDevice(MideaDevice):
             if hasattr(message, str(status)):
                 value = getattr(message, str(status))
                 if status == DeviceAttributes.mode:
-                    if value == 0:
-                        self._attributes[status] = MideaFA56AGDevice._modes[0]
-                    elif value == 2:
-                        self._attributes[status] = MideaFA56AGDevice._modes[1]
-                    elif value == 12:
-                        self._attributes[status] = MideaFA56AGDevice._modes[2]
-                    elif value == 13:
-                        self._attributes[status] = MideaFA56AGDevice._modes[3]
-                    else:
-                        self._attributes[status] = None
+                    self._attributes[status] = next((k for k, v in MideaFA56AGDevice._modes.items() if v == value), None)
                 elif status == DeviceAttributes.power:
                     self._attributes[status] = value
                     if not value:
@@ -114,22 +105,6 @@ class MideaFA56AGDevice(MideaDevice):
                     self._attributes[status] = value
                 new_status[str(status)] = self._attributes[status]
         return new_status
-
-    def _set_oscillation_mode(self, message: MessageSet, value: str) -> None:
-        if value == "Off" or not value:
-            message.oscillate = False
-        else:
-            message.oscillate = True
-            message.oscillation_mode = MideaFADevice._oscillation_modes.index(
-                value,
-            )
-            if value == "Oscillation":
-                if self._attributes[DeviceAttributes.oscillation_angle] == "Off":
-                    message.oscillation_angle = 3  # 90
-                else:
-                    message.oscillation_angle = MideaFADevice._oscillation_angles.index(
-                        self._attributes[DeviceAttributes.oscillation_angle],
-                    )
 
     def set_oscillation(self, attr: str, value: int | str | bool) -> MessageSet | None:
         """Set oscillation mode."""
@@ -161,14 +136,7 @@ class MideaFA56AGDevice(MideaDevice):
         elif attr == DeviceAttributes.mode:
             if value in MideaFA56AGDevice._modes:
                 message = MessageSet(self._message_protocol_version, self.subtype)
-                if str(value) is MideaFA56AGDevice._modes[0]:
-                    message.mode = 0
-                elif str(value) is MideaFA56AGDevice._modes[1]:
-                    message.mode = 2
-                elif str(value) is MideaFA56AGDevice._modes[2]:
-                    message.mode = 12
-                elif str(value) is MideaFA56AGDevice._modes[3]:
-                    message.mode = 13
+                message.mode = MideaFA56AGDevice._modes.get(value)
         elif not (attr == DeviceAttributes.fan_speed and value == 0):
             message = MessageSet(self._message_protocol_version, self.subtype)
             setattr(message, str(attr), value)
